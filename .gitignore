@@ -1,0 +1,11 @@
+# Compiled files
+*.o
+*.exe
+bank_server
+
+# Database files
+data/
+bank.db
+
+# IDE settings
+.vscode/

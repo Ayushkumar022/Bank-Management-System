@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bank Management</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f9; color: #333; max-width: 800px; margin: 20px auto; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 5px;}
+        .container { background-color: #fff; padding: 20px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ddd; }
+        input[type="text"], input[type="number"] { padding: 8px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px; width: 200px; }
+        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        button:hover { background-color: #0056b3; }
+        .delete-btn { background-color: #dc3545; }
+        .delete-btn:hover { background-color: #c82333; }
+        #response, #accounts-list { margin-top: 15px; padding: 10px; border-radius: 4px; background-color: #e9ecef; border-left: 5px solid #007bff; white-space: pre-wrap; font-family: monospace; }
+        .error { border-left-color: #dc3545 !important; }
+    </style>
+</head>
+<body>
+
+    <h1>Bank Management System</h1>
+
+    <div class="container">
+        <h2>View All Accounts</h2>
+        <button onclick="getAccounts()">Refresh Accounts List</button>
+        <div id="accounts-list">Loading accounts...</div>
+    </div>
+
+    <div class="container">
+        <h2>Create New Account</h2>
+        <input type="text" id="ownerName" placeholder="Owner Name">
+        <button onclick="createAccount()">Create Account</button>
+    </div>
+
+    <div class="container">
+        <h2>Deposit / Withdraw</h2>
+        <input type="number" id="accountId" placeholder="Account ID">
+        <input type="number" id="amount" placeholder="Amount">
+        <button onclick="performTransaction('deposit')">Deposit</button>
+        <button onclick="performTransaction('withdraw')">Withdraw</button>
+    </div>
+    
+    <div class="container">
+        <h2>Transfer Funds</h2>
+        <input type="number" id="fromId" placeholder="From Account ID">
+        <input type="number" id="toId" placeholder="To Account ID">
+        <input type="number" id="transferAmount" placeholder="Amount">
+        <button onclick="performTransfer()">Transfer</button>
+    </div>
+
+    <div class="container">
+        <h2>Delete Account</h2>
+        <input type="number" id="deleteId" placeholder="Account ID to Delete">
+        <button onclick="deleteAccount()" class="delete-btn">Delete Account</button>
+    </div>
+
+    <div class="container">
+        <h2>API Response</h2>
+        <div id="response">Responses from the server will appear here.</div>
+    </div>
+
+    <script>
+        const API_BASE_URL = "http://localhost:18080";
+        const responseDiv = document.getElementById('response');
+        const accountsListDiv = document.getElementById('accounts-list');
+
+        function showResponse(data) {
+            responseDiv.textContent = JSON.stringify(data, null, 2);
+            responseDiv.classList.toggle('error', data.status !== 'success');
+        }
+
+        async function createAccount() {
+            const name = document.getElementById('ownerName').value;
+            if (!name) return showResponse({ status: "error", message: "Please enter an owner name." });
+            const res = await fetch(`${API_BASE_URL}/api/create?name=${name}`);
+            showResponse(await res.json());
+            getAccounts();
+        }
+
+        async function performTransaction(type) {
+            const id = document.getElementById('accountId').value;
+            const amount = document.getElementById('amount').value;
+            if (!id || !amount) return showResponse({ status: "error", message: "Please enter both Account ID and Amount." });
+            const res = await fetch(`${API_BASE_URL}/api/transaction?type=${type}&id=${id}&amount=${amount}`);
+            showResponse(await res.json());
+            getAccounts();
+        }
+        
+        async function performTransfer() {
+            const fromId = document.getElementById('fromId').value;
+            const toId = document.getElementById('toId').value;
+            const amount = document.getElementById('transferAmount').value;
+            if (!fromId || !toId || !amount) return showResponse({ status: "error", message: "Please fill all transfer fields." });
+            const res = await fetch(`${API_BASE_URL}/api/transfer?from=${fromId}&to=${toId}&amount=${amount}`);
+            showResponse(await res.json());
+            getAccounts();
+        }
+
+        // NEW FUNCTION FOR DELETING
+        async function deleteAccount() {
+            const id = document.getElementById('deleteId').value;
+            if (!id) return showResponse({ status: "error", message: "Please enter an Account ID to delete." });
+            const res = await fetch(`${API_BASE_URL}/api/delete?id=${id}`);
+            showResponse(await res.json());
+            getAccounts();
+        }
+
+        async function getAccounts() {
+            const res = await fetch(`${API_BASE_URL}/api/accounts`);
+            const accounts = await res.json();
+            if (accounts.length === 0) {
+                accountsListDiv.innerHTML = "<p>No accounts found.</p>";
+                return;
+            }
+            let html = "<ul>";
+            for (const acc of accounts) {
+                html += `<li>ID: ${acc.id}, Name: ${acc.name}, Balance: &#8377;${acc.balance.toFixed(2)}</li>`;
+            }
+            html += "</ul>";
+            accountsListDiv.innerHTML = html;
+        }
+
+        window.onload = getAccounts;
+    </script>
+</body>
+</html>
