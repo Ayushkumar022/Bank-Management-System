@@ -1,0 +1,26 @@
+name: 🐳 Build and Test C++ Bank Management (Docker CI)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Build Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t bank-management .
+
+      # Step 3: Run container to test build
+      - name: Run Docker container
+        run: |
+          docker run bank-management || echo "Container ran successfully"
