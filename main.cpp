@@ -77,8 +77,7 @@ int main()
     const char *port_env = std::getenv("PORT");
     int port = port_env ? std::stoi(port_env) : 18080;
 
-    std::cout << "\n--> Server is ready! Listening on port: " << port << "\n"
-              << std::endl;
+
 
     // NOW, start the server. The program will wait here.
     app.port(port).multithreaded().run();
