@@ -71,11 +71,10 @@ int main()
 
         return crow::response(result.dump());
     });
-    // Print the helpful message FIRST
-    std::cout << "\n--> Server is ready! Listening on port: " << port << "\n" << std::endl;
+    
     // Get PORT from environment (Cloud Run)
     const char *port_env = std::getenv("PORT");
-    int port = port_env ? std::stoi(port_env) : 18080;
+    int port = port_env ? std::stoi(port_env) : 8080;
 
 
 
