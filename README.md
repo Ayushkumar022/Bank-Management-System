@@ -35,3 +35,9 @@ This project is built upon a modern C++ stack, utilizing the following key techn
 ## 📂 Project Structure
 
 The project is organized as follows:
+frontend
+index.html
+backend
+main.cpp
+database
+sqlite3
